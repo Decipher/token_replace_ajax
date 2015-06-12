@@ -1,0 +1,3 @@
+name = Token replace AJAX
+description = A utility for turning tokens into rendered markup via AJAX
+core = 7.x

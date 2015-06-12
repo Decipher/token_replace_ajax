@@ -1,0 +1,60 @@
+<?php
+
+/**
+ * @file
+ * Core functions for Token replace AJAX.
+ */
+
+/**
+ * Implements hook_menu().
+ *
+ * @TODO - Better access checking.
+ */
+function token_replace_ajax_menu() {
+  $items['token_replace/ajax/%'] = array(
+    'page callback'   => 'token_replace_ajax_callback',
+    'page arguments'  => array(2),
+    'access callback' => TRUE,
+  );
+
+  return $items;
+}
+
+/**
+ * Menu callback for Token replace AJAX.
+ */
+function token_replace_ajax_callback($token = '') {
+  $data = array();
+
+  // Get Entity for token context from supplied arguments.
+  if (isset($_REQUEST['entity_type']) && isset($_REQUEST['entity_id'])) {
+    $entity_type = $_REQUEST['entity_type'];
+    $entities    = entity_load($entity_type, array($_REQUEST['entity_id']));
+    $entity      = reset($entities);
+  }
+
+  // Get Entity for token context from posted form.
+  elseif (isset($_POST['form_build_id'])) {
+    // @TODO - Allow for '#limit_validation_errors' to be passed in..
+    list($form, $form_state, $form_id, $form_build_id, $commands) = ajax_get_form();
+    $form_state['programmed'] = TRUE;
+    drupal_process_form($form['#form_id'], $form, $form_state);
+
+    $entity_type = $form['#entity_type'];
+    $entity      = (object) array_merge((array) $form["#entity"], isset($form_state['values']) ? $form_state['values'] : array());
+  }
+
+  if (isset($entity_type) && isset($entity)) {
+    $data[$entity_type] = $entity;
+  }
+
+  print json_encode(array(
+    'token'    => $token,
+    'value'    => token_replace($token, $data),
+    'messages' => array(
+      'data' => drupal_get_messages(NULL, FALSE),
+      'html' => theme('status_messages'),
+    ),
+  ));
+  drupal_exit();
+}
