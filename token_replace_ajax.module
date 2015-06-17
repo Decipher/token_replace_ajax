@@ -7,18 +7,70 @@
 
 /**
  * Implements hook_menu().
- *
- * @TODO - Better access checking.
  */
 function token_replace_ajax_menu() {
   $items['token_replace/ajax/%'] = array(
-    'page callback'   => 'token_replace_ajax_callback',
-    'page arguments'  => array(2),
-    'access callback' => TRUE,
+    'page callback'    => 'token_replace_ajax_callback',
+    'page arguments'   => array(2),
+    'access callback'  => 'token_replace_ajax_access_callback',
+    'access arguments' => array(2),
   );
 
   return $items;
 }
+
+/**
+ * Implements hook_permission().
+ */
+function token_replace_ajax_permission() {
+  return array(
+    'access token_replace_ajax callback' => array(
+      'title' => t('Access Token replace AJAX callback'),
+    ),
+  );
+}
+
+/**
+ * Access callback for Token replace AJAX.
+ */
+function token_replace_ajax_access_callback($token = '') {
+  // Ensure that we get the token if it is provided.
+  // @TODO - Determine why this is needed, as it should always be provided, but
+  // it appears that isn't if it is a POST request.
+  if (empty($token) && arg(2) != '') {
+    $token = arg(2);
+  }
+
+  // Return FALSE if no token is provided.
+  if (empty($token)) {
+    return FALSE;
+  }
+
+  // Check if user has permission.
+  if (user_access('access token_replace_ajax callback')) {
+    return TRUE;
+  }
+
+  // Check if an access key has been provided and it matches the required key
+  // for the requested token.
+  elseif (isset($_GET['key']) && $_GET['key'] == token_replace_ajax_access_key($token)) {
+    return TRUE;
+  }
+
+  // Check if this is a POST callback from a valid Drupal form.
+  // @TODO - Add additional access check here.
+  elseif (isset($_POST['form_build_id'])) {
+    $form_state    = form_state_defaults();
+    $form_build_id = $_POST['form_build_id'];
+    $form          = form_get_cache($form_build_id, $form_state);
+    if (!is_null($form)) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
 
 /**
  * Menu callback for Token replace AJAX.
@@ -57,4 +109,15 @@ function token_replace_ajax_callback($token = '') {
     ),
   ));
   drupal_exit();
+}
+
+/**
+ * Generates a key to protect Token replacement AJAX callbacks.
+ *
+ * @param $token
+ *
+ * @return string
+ */
+function token_replace_ajax_access_key($token) {
+  return substr(drupal_hmac_base64($token, drupal_get_private_key() . drupal_get_hash_salt()), 0, 8);
 }
