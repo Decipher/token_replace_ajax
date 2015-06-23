@@ -94,6 +94,8 @@ function token_replace_ajax_callback($token = '') {
 
     $entity_type = $form['#entity_type'];
     $entity      = (object) array_merge((array) $form["#entity"], isset($form_state['values']) ? $form_state['values'] : array());
+    
+    field_attach_presave($entity_type, $entity);
   }
 
   if (isset($entity_type) && isset($entity)) {
