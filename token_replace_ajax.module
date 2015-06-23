@@ -93,7 +93,13 @@ function token_replace_ajax_callback($token = '') {
     drupal_process_form($form['#form_id'], $form, $form_state);
 
     $entity_type = $form['#entity_type'];
+    $entity_info = entity_get_info($entity_type);
     $entity      = (object) array_merge((array) $form["#entity"], isset($form_state['values']) ? $form_state['values'] : array());
+
+    // Add a dummy entity ID if none exists.
+    $entity->{$entity_info['entity keys']['id']} = isset($entity->{$entity_info['entity keys']['id']}) ? $entity->{$entity_info['entity keys']['id']} : 0;
+
+    field_attach_prepare_view($entity_type, array($entity), 'full');
   }
 
   if (isset($entity_type) && isset($entity)) {
