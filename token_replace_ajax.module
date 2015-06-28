@@ -31,6 +31,27 @@ function token_replace_ajax_permission() {
 }
 
 /**
+ * Implements hook_custom_theme().
+ */
+function token_replace_ajax_custom_theme() {
+  // Ensure that if this is a valid POST request that we use the same theme
+  // used by the referring form.
+  if (isset($_POST['form_build_id'])) {
+    $form_state    = form_state_defaults();
+    $form_build_id = $_POST['form_build_id'];
+    $form          = form_get_cache($form_build_id, $form_state);
+    if (!is_null($form)) {
+      global $base_path;
+
+      $path = preg_replace('/' . str_replace('/', '\/', $base_path) . '/', '', $form['#action'], 1);
+      if (path_is_admin($path)) {
+        return variable_get('admin_theme');
+      }
+    }
+  }
+}
+
+/**
  * Access callback for Token replace AJAX.
  */
 function token_replace_ajax_access_callback($token = '') {
