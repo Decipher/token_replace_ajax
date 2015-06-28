@@ -79,13 +79,12 @@ function token_replace_ajax_access_callback($token = '') {
   }
 
   // Check if this is a POST callback from a valid Drupal form.
-  // @TODO - Add additional access check here.
   elseif (isset($_POST['form_build_id'])) {
     $form_state    = form_state_defaults();
     $form_build_id = $_POST['form_build_id'];
     $form          = form_get_cache($form_build_id, $form_state);
-    if (!is_null($form)) {
-      return TRUE;
+    if (!is_null($form) && isset($form['token_replace_ajax']['#value'])) {
+      return $form['token_replace_ajax']['#value'] == TRUE;
     }
   }
 
