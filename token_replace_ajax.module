@@ -120,7 +120,7 @@ function token_replace_ajax_callback($token = '') {
     // Add a dummy entity ID if none exists.
     $entity->{$entity_info['entity keys']['id']} = isset($entity->{$entity_info['entity keys']['id']}) ? $entity->{$entity_info['entity keys']['id']} : 0;
 
-    field_attach_prepare_view($entity_type, array($entity), 'full');
+    field_attach_prepare_view($entity_type, array($entity->{$entity_info['entity keys']['id']} => $entity), 'full');
   }
 
   if (isset($entity_type) && isset($entity)) {
