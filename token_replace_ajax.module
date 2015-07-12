@@ -120,9 +120,9 @@ function token_replace_ajax_callback($token = '') {
 
   // Get Entity for token context from posted form.
   elseif (isset($_POST['form_build_id'])) {
-    // @TODO - Allow for '#limit_validation_errors' to be passed in..
     list($form, $form_state, $form_id, $form_build_id, $commands) = ajax_get_form();
-    $form_state['programmed'] = TRUE;
+    $form_state['triggering_element'] = array();
+    $form_state['programmed']         = TRUE;
     drupal_process_form($form['#form_id'], $form, $form_state);
 
     // Determine what entity we need for the supplied token (if any).
