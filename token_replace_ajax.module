@@ -157,8 +157,8 @@ function token_replace_ajax_callback($token = '') {
     if (isset($entity_type) && isset($entity)) {
       $entity_info = $entity_types[$entity_type];
 
-      // Add a dummy entity ID if none exists.
-      $entity->{$entity_info['entity keys']['id']} = isset($entity->{$entity_info['entity keys']['id']}) ? $entity->{$entity_info['entity keys']['id']} : 0;
+      // Add a dummy entity ID.
+      $entity->{$entity_info['entity keys']['id']} = 'token_replace_ajax';
 
       field_attach_prepare_view($entity_type, array($entity->{$entity_info['entity keys']['id']} => $entity), 'full');
     }
@@ -187,7 +187,7 @@ function token_replace_ajax_field_display_alter(&$display, $context) {
 
   // If this is a dummy entity provided by Token replace AJAX, ensure no hidden
   // fields.
-  if ($id === 0 && $display['type'] == 'hidden') {
+  if ($id == 'token_replace_ajax' && $display['type'] == 'hidden') {
     $field_type      = field_info_field_types($context['field']['type']);
     $display['type'] = $field_type['default_formatter'];
   }
