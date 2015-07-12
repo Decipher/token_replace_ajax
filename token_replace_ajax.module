@@ -168,9 +168,11 @@ function token_replace_ajax_callback($token = '') {
     $data[$entity_type] = $entity;
   }
 
+  $value = token_replace($token, $data);
+  drupal_alter('token_replace_ajax_response', $value, $token, $data);
   print json_encode(array(
     'token'    => $token,
-    'value'    => token_replace($token, $data),
+    'value'    => $value,
     'messages' => array(
       'data' => drupal_get_messages(NULL, FALSE),
       'html' => theme('status_messages'),
