@@ -6,6 +6,18 @@
  */
 
 /**
+ * Include additional files.
+ */
+$dirname  = dirname(__FILE__) . '/includes';
+$includes = file_scan_directory($dirname, '/.inc$/');
+foreach (module_list() as $module) {
+  $file = "{$dirname}/{$module}.inc";
+  if (isset($includes[$file])) {
+    require_once $file;
+  }
+}
+
+/**
  * Implements hook_menu().
  */
 function token_replace_ajax_menu() {
