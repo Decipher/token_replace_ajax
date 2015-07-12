@@ -113,14 +113,43 @@ function token_replace_ajax_callback($token = '') {
     $form_state['programmed'] = TRUE;
     drupal_process_form($form['#form_id'], $form, $form_state);
 
-    $entity_type = $form['#entity_type'];
-    $entity_info = entity_get_info($entity_type);
-    $entity      = (object) array_merge((array) $form["#entity"], isset($form_state['values']) ? $form_state['values'] : array());
+    // Determine what entity we need for the supplied token (if any).
+    $entity_types      = entity_get_info();
+    $token_info        = token_scan($token);
+    $token_type        = key($token_info);
+    $token_entity_type = NULL;
+    foreach ($entity_types as $entity_info_type => $entity_info) {
+      if (isset($entity_info['token type']) && $entity_info['token type'] == $token_type) {
+        $token_entity_type = $entity_info_type;
+        break;
+      }
+    }
 
-    // Add a dummy entity ID if none exists.
-    $entity->{$entity_info['entity keys']['id']} = isset($entity->{$entity_info['entity keys']['id']}) ? $entity->{$entity_info['entity keys']['id']} : 0;
+    // If form has an entity type and it either matches our token entity type or
+    // we don't have a token entity type.
+    if (isset($form['#entity_type']) && (!isset($token_entity_type) || $token_entity_type == $form['#entity_type'])) {
+      $entity_type = $form['#entity_type'];
+      $entity      = (object) array_merge((array) $form["#entity"], isset($form_state['values']) ? $form_state['values'] : array());
+    }
 
-    field_attach_prepare_view($entity_type, array($entity->{$entity_info['entity keys']['id']} => $entity), 'full');
+    // Else, if we do have a token entity type but the form doesn't have an
+    // entity type.
+    elseif (isset($token_entity_type)) {
+      $result = module_invoke($entity_info['module'], 'token_replace_ajax_form_entity', $token_entity_type, $form, $form_state);
+      if ($result) {
+        $entity_type = $token_entity_type;
+        $entity      = $result;
+      }
+    }
+
+    if (isset($entity_type) && isset($entity)) {
+      $entity_info = $entity_types[$entity_type];
+
+      // Add a dummy entity ID if none exists.
+      $entity->{$entity_info['entity keys']['id']} = isset($entity->{$entity_info['entity keys']['id']}) ? $entity->{$entity_info['entity keys']['id']} : 0;
+
+      field_attach_prepare_view($entity_type, array($entity->{$entity_info['entity keys']['id']} => $entity), 'full');
+    }
   }
 
   if (isset($entity_type) && isset($entity)) {
