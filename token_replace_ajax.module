@@ -93,6 +93,10 @@ function token_replace_ajax_form_alter(&$form, &$form_state) {
 
 /**
  * Access callback for Token replace AJAX.
+ *
+ * @param string $token
+ *
+ * @return bool
  */
 function token_replace_ajax_access_callback($token = '') {
   // Ensure that we get the token if it is provided.
@@ -133,6 +137,10 @@ function token_replace_ajax_access_callback($token = '') {
 
 /**
  * Menu callback for Token replace AJAX.
+ *
+ * @param string $token
+ *
+ * @throws Exception
  */
 function token_replace_ajax_callback($token = '') {
   $data = array();
@@ -146,7 +154,7 @@ function token_replace_ajax_callback($token = '') {
 
   // Get Entity for token context from posted form.
   elseif (isset($_POST['form_build_id'])) {
-    list($form, $form_state, $form_id, $form_build_id, $commands) = ajax_get_form();
+    list($form, $form_state, , ,) = ajax_get_form();
     $form_state['triggering_element'] = array();
     $form_state['programmed']         = TRUE;
     drupal_process_form($form['#form_id'], $form, $form_state);
@@ -172,7 +180,7 @@ function token_replace_ajax_callback($token = '') {
 
     // Else, if we do have a token entity type but the form doesn't have an
     // entity type.
-    elseif (isset($token_entity_type)) {
+    elseif (isset($token_entity_type) && isset($entity_info)) {
       $result = module_invoke($entity_info['module'], 'token_replace_ajax_form_entity', $token_entity_type, $form, $form_state);
       if ($result) {
         $entity_type = $token_entity_type;
@@ -209,9 +217,14 @@ function token_replace_ajax_callback($token = '') {
 
 /**
  * Implements hook_field_display_alter().
+ *
+ * @param $display
+ * @param $context
+ *
+ * @throws EntityMalformedException
  */
 function token_replace_ajax_field_display_alter(&$display, $context) {
-  list($id, $vid, $bundle_name) = entity_extract_ids($context['entity_type'], $context['entity']);
+  list($id, ,) = entity_extract_ids($context['entity_type'], $context['entity']);
 
   // If this is a dummy entity provided by Token replace AJAX, ensure no hidden
   // fields.
