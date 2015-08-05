@@ -66,6 +66,32 @@ function token_replace_ajax_custom_theme() {
 }
 
 /**
+ * Implements hook_module_implements_alter().
+ *
+ * @param $implementations
+ * @param $hook
+ */
+function token_replace_ajax_module_implements_alter(&$implementations, $hook) {
+  if ('form_alter' == $hook) {
+    $implementation = $implementations['token_replace_ajax'];
+    unset($implementations['token_replace_ajax']);
+    $implementations['token_replace_ajax'] = $implementation;
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * @param $form
+ * @param $form_state
+ */
+function token_replace_ajax_form_alter(&$form, &$form_state) {
+  if (isset($form['token_replace_ajax']['#value']) && $form['token_replace_ajax']['#value']) {
+    $form_state['cache'] = TRUE;
+  }
+}
+
+/**
  * Access callback for Token replace AJAX.
  */
 function token_replace_ajax_access_callback($token = '') {
