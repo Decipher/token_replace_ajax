@@ -1,5 +1,6 @@
 # Token replace AJAX
---------------------
+
+[![Build Status](https://travis-ci.org/Decipher/token_replace_ajax.svg)](https://travis-ci.org/Decipher/token_replace_ajax)
 
 The Token replace AJAX module adds the ability to process individual tokens via
 an AJAX callback. It is primarily a developer utility, built for the purpose of
@@ -8,7 +9,6 @@ offloading common functionality from other modules.
 
 
 ## Usage
---------
 
 The Token replace AJAX module is essentially a very basic REST API with only one
 method:
@@ -72,7 +72,6 @@ Returns the token, replacement and any Drupal messages as a JSON object.
 
 
 ## Advanced usage
------------------
 
 You can also POST an entity form to the endpoint (excluding the entity_type and
 entity_id parameters) and the module will create a dummy entity as the token
