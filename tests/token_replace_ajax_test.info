@@ -1,6 +1,0 @@
-name = Token replace AJAX tests
-description = Support module for Token replace AJAX related testing.
-package = Testing
-dependencies[] = token_replace_ajax
-core = 7.x
-hidden = TRUE
